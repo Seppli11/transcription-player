@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "transcription-player-gui",
+    "rubberband-rs"
+]

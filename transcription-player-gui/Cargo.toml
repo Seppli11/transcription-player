@@ -1,0 +1,13 @@
+[package]
+name = "transcription-player-gui"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rubberband-rs = {path = "../rubberband-rs"}
+log = { version = "0.4", features = ["release_max_level_info"] }
+rb = "0.4.1"
+thiserror = "1.0"
+rodio = "0.16.0"
