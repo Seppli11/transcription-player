@@ -38,18 +38,21 @@ pub enum AudioError {
 }
 
 pub struct AudioPlayer {
-    stream_handle: OutputStreamHandle,
+    // when _stream_handle and _stream drop, the audio stops playing
+    _stream_handle: OutputStreamHandle,
+    _stream: OutputStream,
     sink: Sink,
 }
 
 impl AudioPlayer {
     pub fn new() -> Result<Self, AudioError> {
-        let (_stream, stream_handle) =
+        let (stream, stream_handle) =
             OutputStream::try_default().map_err(|err| AudioError::from(err))?;
 
         let sink = Sink::try_new(&stream_handle).map_err(|err| AudioError::from(err))?;
         Ok(AudioPlayer {
-            stream_handle,
+            _stream_handle: stream_handle,
+            _stream: stream,
             sink,
         })
     }

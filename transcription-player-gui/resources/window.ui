@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <template class="TranscribleWindow" parent="AdwApplicationWindow">
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
+        <property name="hexpand">true</property>
+        <child>
+          <object class="AdwHeaderBar">
+            <child type="end">
+              <object class="GtkButton">
+                <property name="label">Load</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkScale">
+            <property name="orientation">horizontal</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">horizontal</property>
+            <child>
+              <object class="GtkButton">
+                <property name="label">Previous</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="label">play/pause</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="label">next</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

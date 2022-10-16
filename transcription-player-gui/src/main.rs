@@ -1,27 +1,29 @@
 mod audio;
+pub mod ui {
+    pub mod timeline;
+    pub mod window;
+}
 
-use std::{
-    cmp,
-    collections::VecDeque,
-    fs::File,
-    io::{BufRead, BufReader},
-    path::Path,
-    thread,
-    time::Duration,
-};
+use gtk::{gio, prelude::*};
+use ui::window::TranscribleWindow;
 
-use audio::AudioPlayer;
-use rodio::{
-    cpal::SampleFormat,
-    source::{Delay, SineWave},
-    Decoder, OutputStream, Source,
-};
-use rubberband_rs::{AudioBuffer, RubberBand, RubberBandOption};
+const APP_ID: &str = "ninja.seppli.Transcrible";
 
 fn main() {
-    let mut player = AudioPlayer::new().unwrap();
-    player.load(Path::new("./test.mp3")).unwrap();
-    player.play();
+    gio::resources_register_include!("transcrible.gresource")
+        .expect("Failed to register resources");
 
-    std::thread::sleep(Duration::from_secs(5));
+    let mut app = adw::Application::builder().application_id(APP_ID).build();
+    let app2 = &mut app;
+    app.connect_activate(build_ui);
+    //app.connect_startup(setup_shortcuts);
+
+    app.run();
 }
+
+fn build_ui(app: &adw::Application) {
+    let window = TranscribleWindow::new(app);
+    window.present();
+    window.show();
+}
+fn setup_shortcuts(app: &adw::Application) {}

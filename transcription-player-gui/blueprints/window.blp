@@ -1,0 +1,31 @@
+using Gtk 4.0;
+using Adw 1;
+
+template TranscribleWindow : Adw.ApplicationWindow {
+    Gtk.Box {
+        orientation: vertical;
+        hexpand: true;
+
+        Adw.HeaderBar {
+            [end]
+            Gtk.Button {
+                label: "Load";
+            }
+        }
+        Gtk.Scale {
+            orientation: horizontal;
+        }
+        Gtk.Box {
+            orientation: horizontal;
+            Gtk.Button {
+                label: "Previous";
+            }
+            Gtk.Button {
+                label: "play/pause";
+            }
+            Gtk.Button {
+                label: "next";
+            }
+        }
+    }
+}

@@ -6,8 +6,15 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+gtk = { version = "0.4.8", package = "gtk4"}
+glib = "0.15.12"
+adw = { version = "0.1.1", package = "libadwaita" }
+
 rubberband-rs = {path = "../rubberband-rs"}
 log = { version = "0.4", features = ["release_max_level_info"] }
 rb = "0.4.1"
 thiserror = "1.0"
 rodio = "0.16.0"
+
+[build-dependencies]
+gtk = { version = "0.4.8", package = "gtk4"}
