@@ -9,6 +9,9 @@
             "request": "launch",
             "name": "Debug",
             "cargo": {
+                "env": {
+                    "RUST_BACKTRSCE": "1"
+                },
                 "args": [
                     "run",
                     "--bin=transcription-player-gui",

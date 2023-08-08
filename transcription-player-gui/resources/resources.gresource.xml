@@ -2,6 +2,7 @@
 <gresources>
     <gresource prefix="/ninja/seppli/Transcrible/">
         <file compressed="true" preprocess="xml-stripblanks">window.ui</file>
+        <file compressed="true">style.css</file>
         <file compressed="true" preprocess="xml-stripblanks" alias="gtk/help-overlay.ui">shortcuts.ui</file>
     </gresource>
 </gresources>

@@ -1,20 +1,15 @@
 use std::{
-    backtrace::Backtrace,
     cmp,
     collections::VecDeque,
-    fmt::Error,
     fs::File,
-    io::{self, BufRead, BufReader},
+    io::{self, BufReader},
     path::Path,
-    thread,
     time::Duration,
 };
 
 use rodio::{
-    cpal::SampleFormat,
-    decoder::DecoderError,
-    source::{Delay, SineWave},
-    Decoder, OutputStream, OutputStreamHandle, PlayError, Sink, Source, StreamError,
+    decoder::DecoderError, Decoder, OutputStream, OutputStreamHandle, PlayError, Sink, Source,
+    StreamError,
 };
 use rubberband_rs::{AudioBuffer, RubberBand, RubberBandOption};
 use thiserror::Error;
@@ -57,19 +52,19 @@ impl AudioPlayer {
         })
     }
 
-    pub fn load(&mut self, path: &Path) -> Result<(), AudioError> {
+    pub fn load<P: AsRef<Path>>(&mut self, path: &P) -> Result<(), AudioError> {
         let file = File::open(path).map_err(|err| AudioError::LoadError {
-            path: path.display().to_string(),
+            path: path.as_ref().display().to_string(),
             source: err,
         })?;
         let buffered_reader = BufReader::new(file);
         let source = Decoder::new(buffered_reader).map_err(|err| AudioError::DecodeError {
-            path: path.display().to_string(),
+            path: path.as_ref().display().to_string(),
             source: err,
         })?;
-        let RUBBER_BAND_OPTIONS: RubberBandOption =
+        let rubber_band_options: RubberBandOption =
             RubberBandOption::PROCESS_REAL_TIME | RubberBandOption::ENGINE_FINER;
-        let source = RubberBandSource::new(source.convert_samples(), RUBBER_BAND_OPTIONS);
+        let source = RubberBandSource::new(source.convert_samples(), rubber_band_options);
 
         self.sink.append(source);
         self.sink.sleep_until_end();
@@ -82,8 +77,21 @@ impl AudioPlayer {
     pub fn pause(&mut self) {
         self.sink.pause();
     }
+
+    pub fn toggle_play_status(&mut self) {
+        if self.is_paused() {
+            self.play()
+        } else {
+            self.pause()
+        }
+    }
+
     pub fn seek(&mut self, time: Duration) {
         todo!()
+    }
+
+    pub fn is_paused(&self) -> bool {
+        self.sink.is_paused()
     }
 }
 
@@ -210,6 +218,66 @@ impl<S: Source + Iterator<Item = f32>> Iterator for RubberBandSource<S> {
         } else {
             let sample = self.buffer.pop_front();
             sample
+        }
+    }
+}
+
+pub mod worker {
+    use std::path::PathBuf;
+
+    use relm4::{ComponentUpdate, Components, Model};
+
+    use super::{AudioError, AudioPlayer};
+
+    pub trait AudioPlayerWorkerParent: Model {
+        fn loading_done_msg() -> Self::Msg;
+        fn loading_error_msg(err: AudioError) -> Self::Msg;
+    }
+
+    pub struct AudioPlayerWorkerModel {
+        player: AudioPlayer,
+    }
+
+    pub enum AudioPlayerMsg {
+        Load(PathBuf),
+        TogglePlayPause,
+    }
+
+    impl Model for AudioPlayerWorkerModel {
+        type Msg = AudioPlayerMsg;
+        type Widgets = ();
+        type Components = ();
+    }
+
+    impl<ParentModel> ComponentUpdate<ParentModel> for AudioPlayerWorkerModel
+    where
+        ParentModel: AudioPlayerWorkerParent,
+    {
+        fn init_model(_parent_model: &ParentModel) -> AudioPlayerWorkerModel {
+            let player = AudioPlayer::new().expect("Couldn't create audio player");
+            AudioPlayerWorkerModel { player }
+        }
+
+        fn update(
+            &mut self,
+            msg: AudioPlayerMsg,
+            _components: &(),
+            _sender: glib::Sender<AudioPlayerMsg>,
+            parent_sender: glib::Sender<<ParentModel as Model>::Msg>,
+        ) {
+            match msg {
+                AudioPlayerMsg::Load(path) => {
+                    parent_sender
+                        .send(match self.player.load(&path) {
+                            Ok(_) => ParentModel::loading_done_msg(),
+                            Err(err) => ParentModel::loading_error_msg(err),
+                        })
+                        .unwrap();
+                }
+                AudioPlayerMsg::TogglePlayPause => {
+                    self.player.toggle_play_status();
+                }
+            };
         }
     }
 }

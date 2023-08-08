@@ -7,6 +7,7 @@ const RESOURCE_DIR: &str = "./resources";
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
+    return;
 
     compile_blueprints().expect("Couldn't compile blueprints");
 
